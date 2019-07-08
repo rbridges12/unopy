@@ -31,3 +31,4 @@ class Card:
 
     def get_number(self):
         return self.number
+
