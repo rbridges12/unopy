@@ -1,5 +1,5 @@
 # Virtual UNO Classes
-
+import random
 class Player:
     # Initialize player with specified name and hand of cards, empty by default
     def __init__(self, name, hand=None):
@@ -42,4 +42,11 @@ class Card:
     # Get the card's number
     def get_number(self):
         return self.number
+
+class Deck:
+
+
+
+
+
 

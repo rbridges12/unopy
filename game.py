@@ -1,6 +1,7 @@
 import uno
 
 class game:
+
     def __init__(self, players):
         self.players = players
         self.deck = []
@@ -24,3 +25,23 @@ class game:
         for n in range(4):
             self.deck.append(uno.Card("wild", "wildcard"))
             self.deck.append(uno.Card("wild", "draw four"))
+
+
+    def shuffle(self,cards):
+        for card in deck:
+            randomize = random.randint(0,108)
+            temp_card = deck[randomize]
+            deck.pop(temp_card)
+
+    def draw_two(self,deck):
+        deck_size = len(deck)
+        random = random.randint(0,deck_size)
+        deck.pop(random)
+        deck.pop(random)
+
+
+
+
+
+
+
