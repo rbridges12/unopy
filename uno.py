@@ -1,7 +1,7 @@
 # Virtual UNO Classes
 
 class Player:
-    # Initialize
+    # Initialize player with specified name and han of cards, empty by default
     def __init__(self, name, hand=None):
         self.name = name
         if hand == None:
