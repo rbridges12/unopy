@@ -13,7 +13,7 @@ class Player:
 
     # Remove a card from the players hand, specifying the index of the card in the list of cards in hand
     def remove_from_hand(self, card_index):
-        self.hand.del(card_index)
+        self.hand.pop(card_index)
 
     # Set the player's hand to a specific list of cards
     def set_hand(self, hand):
