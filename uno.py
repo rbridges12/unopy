@@ -1,5 +1,5 @@
 # Virtual UNO Classes
-import random
+from termcolor import colored
 class Player:
     # Initialize player with specified name and hand of cards, empty by default
     def __init__(self, name, hand=None):
@@ -27,6 +27,15 @@ class Player:
     def get_name(self):
         return self.name
 
+    def get_hand(self):
+        return self.hand
+
+    def str(self):
+        return '_________\n
+               '|       |\n
+               '|       |\n
+               ''
+
 
 class Card:
     # Initialize the card with specified color and number
@@ -43,7 +52,7 @@ class Card:
     def get_number(self):
         return self.number
 
-class Deck:
+#class Deck:
 
 
 
