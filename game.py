@@ -1,7 +1,7 @@
 import uno
 import random
 
-class game:
+class Game:
 
     def __init__(self, players, deck=None):
         self.players = players
