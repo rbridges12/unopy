@@ -36,9 +36,7 @@ class Game:
                 player.add_to_hand(self.deck.draw_card())
 
     def player_has_won(self):
-        print('won?')
         for player in self.players:
-            print(player.get_name())
             if player.has_won():
                 return True
         return False

@@ -20,7 +20,6 @@ class Player:
         self.hand.pop(card_index)
 
     def has_won(self):
-        print(len(self.hand))
         if len(self.hand) == 0:
             return True
         return False
