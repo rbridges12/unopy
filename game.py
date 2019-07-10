@@ -76,22 +76,25 @@ class Game:
             self.turn_index = 0
 
     def do_turn(self, player):
-        last_card_played = self.played_cards[len(self.played_cards) - 1]
-        last_number = last_card_played.get_number()
-        if type(last_number) == 'int':
+        if self.played_cards == []:
             self.play_card(player)
-        elif last_number == 'skip':
-            self.skip_player(player)
-            print('%s was skipped' % (player.get_name()))
-        elif last_number == 'reverse':
-            self.reverse()
-            print('order reversed')
-        elif last_number == 'draw 2':
-            self.draw_multiple(player, 2)
-            print('%s had to draw 2 cards' % (player.get_name()))
-        elif last_number == 'draw 4':
-            self.draw_multiple(player, 4)
-            print('%s had to draw 4 cards' % (player.get_name()))
+        else:
+            last_card_played = self.played_cards[len(self.played_cards) - 1]
+            last_number = last_card_played.get_number()
+            if type(last_number) == 'int':
+                self.play_card(player)
+            elif last_number == 'skip':
+                self.skip_player(player)
+                print('%s was skipped' % (player.get_name()))
+            elif last_number == 'reverse':
+                self.reverse()
+                print('order reversed')
+            elif last_number == 'draw 2':
+                self.draw_multiple(player, 2)
+                print('%s had to draw 2 cards' % (player.get_name()))
+            elif last_number == 'draw 4':
+                self.draw_multiple(player, 4)
+                print('%s had to draw 4 cards' % (player.get_name()))
 
     def init_game(self):
         self.init_deck()
