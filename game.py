@@ -55,8 +55,8 @@ class Game:
 
     def play_card(self, player):
         print('%s\'s turn: ' % (player.get_name()))
+        i = 1
         for card in player.get_hand():
-            i = 1
             print('Card %s:' % (i))
             print(card)
             i += 1
