@@ -89,13 +89,13 @@ class Game:
     # Make the specified player play a card
     def play_card(self, player):
 
-        self.draw_card_horizontal(player.get_hand())
+        print(self.draw_card_horizontal(player.get_hand()))
         # Print out the player's hand
-        #i = 1
-        #for card in player.get_hand():
-         #   print('\nCard %s:' % i)
-          #  print(card)
-           # i += 1
+        i = 1
+        for card in player.get_hand():
+            print('\nCard %s:' % i)
+            print(card)
+            i += 1
 
         # Make the player draw cards until one of them can be played
         # TODO: add functionality for different rule where player only has to draw once
@@ -261,11 +261,13 @@ class Game:
         output = ''
         card_lines = []
         for card in card_list:
-            card_lines += str(card).split('\n')
+            card_lines.append(str(card).split('\n'))
 
         for row_index in range(len(card_lines[0])):
             for lines in card_lines:
                 output += lines[row_index]
+                output += ' '
+            output += '\n'
         return output
 
 
