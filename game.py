@@ -263,9 +263,9 @@ class Game:
         for card in card_list:
             card_lines += str(card).split('\n')
 
-        for row in card_lines[0]:
+        for row_index in range(len(card_lines[0])):
             for lines in card_lines:
-                output += lines[row]
+                output += lines[row_index]
         return output
 
 
