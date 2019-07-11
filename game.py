@@ -222,6 +222,7 @@ class Game:
             # Do their turn and move to the next turn
             self.do_turn(current_player)
             self.turn += 1
+
         # Print the winning player's name
         print('%s won!' % (current_player.get_name()))
 
