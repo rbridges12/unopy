@@ -150,7 +150,7 @@ class Game:
         print('\n\n\n\n\n\nTurn %s, %s\'s turn: ' % (self.turn, name))
 
         # If no cards have been played, the player can play a card
-        # TODO: find a way to handle this without checking everytime
+        # TODO: find a way to handle this without checking every time
         if self.played_cards == []:
             self.play_card(player)
         else:
