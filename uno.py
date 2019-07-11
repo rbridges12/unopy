@@ -5,7 +5,6 @@ import random
 
 
 class Player:
-
     # Initialize player with specified name and hand of cards, empty by default
     def __init__(self, name, hand=None):
 
@@ -44,7 +43,6 @@ class Player:
 
 
 class Card:
-
     # Initialize the card with specified color and number
     def __init__(self, color, number):
 
@@ -80,7 +78,7 @@ class Card:
 
         # Creating card graphics
         card_str = ' __________ \n|%s%s|\n|          |\n|          |\n|          |\n|          |\n|__________|' % (
-        self.number, spacing)
+            self.number, spacing)
         color_list = ['red', 'green', 'yellow', 'blue']
 
         # Returns color of card
@@ -91,6 +89,7 @@ class Card:
 
     # Allow for card size scaling
     def str_scale(self, width, height=None):
+        pass
 
 
 class Deck:
@@ -107,7 +106,6 @@ class Deck:
     # Shuffles deck
     def shuffle(self):
         for card in self.card_list:
-
             random_index = random.randint(0, len(self.card_list) - 1)
             temp_card = self.card_list.pop(random_index)
             self.card_list.append(temp_card)
@@ -131,11 +129,3 @@ class Deck:
         for card in self.card_list:
             output += str(card) + '\n'
         return output
-
-
-
-
-
-
-
-
