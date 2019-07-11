@@ -256,6 +256,14 @@ class Game:
     def draw_card_horizontal(self, card_list):
 
         output = ''
+        card_lines = []
+        for card in card_list:
+            card_lines += str(card).split('\n')
 
-    for card in card_list:
-        lines = str(card).split('\n')
+        for row in card_lines[0]:
+            for lines in card_lines:
+                output += lines[row]
+
+        return output
+
+
