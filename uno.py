@@ -1,12 +1,14 @@
 # Virtual UNO Classes
 
-import random
 from termcolor import colored
+import random
 
 
 class Player:
+
     # Initialize player with specified name and hand of cards, empty by default
     def __init__(self, name, hand=None):
+
         self.name = name
         if hand == None:
             self.hand = []
@@ -36,38 +38,55 @@ class Player:
     def get_name(self):
         return self.name
 
+    # Get the player's hand
     def get_hand(self):
         return self.hand
 
 
 class Card:
+
     # Initialize the card with specified color and number
     def __init__(self, color, number):
+
         # TODO: error catching for invalid colors/numbers?
         self.color = color
         self.number = number
+        if self.color == 'wild':
+            self.temp_color = None
+
+    # If the card is wild, set it's temporary color to the specified color
+    def set_temp_color(self, temp_color):
+        self.temp_color = temp_color
 
     # Get the card's color
-    def  get_color(self):
+    def get_color(self):
         return self.color
+
+    # If the card is wild, get its temporary color to play off of
+    def get_temp_color(self):
+        return self.temp_color
 
     # Get the card's number
     def get_number(self):
         return self.number
 
+    # Format card to a string graphic to display in terminal
     def __str__(self):
+
+        # Get proper spacing for line on card with the card type
         spacing = ''
         for i in range(10 - len(str(self.number))):
             spacing += ' '
 
         card_str = ' __________ \n|%s%s|\n|          |\n|          |\n|          |\n|          |\n|__________|' % (
         self.number, spacing)
-
         color_list = ['red', 'green', 'yellow', 'blue']
         if self.color in (color_list):
             return colored(card_str, self.color)
         else:
             return colored(card_str, 'magenta')
+
+    def str_scale(self, width, height=None):
 
 
 class Deck:
@@ -99,6 +118,7 @@ class Deck:
         for card in self.card_list:
             output += str(card) + '\n'
         return output
+
 
 
 
