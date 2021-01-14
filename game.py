@@ -3,8 +3,8 @@ import uno
 
 class Game:
 
-    # Create game object specifying a list of Player objects and optionally a Deck object
-    def __init__(self, players, deck=None):
+    # Create game object specifying a list of Player objects, an optional Deck object, and an optional GameLogger object
+    def __init__(self, players, deck=None, logger=None):
 
         self.players = players
 
@@ -12,34 +12,13 @@ class Game:
         if deck is None:
             self.deck = uno.Deck()
 
-        # Create a list for played cards and an index for which player's turn it is
-        self.played_cards = []
+        # If logger is not specified, make a new one
+        if logger is None:
+          self.logger = uno.GameLogger()
+          
+        # Create an index for which player's turn it is
         self.turn = 0
-
-    # Add all necessary cards to the empty Deck
-    def init_deck(self):
-
-        colors = ["red", "blue", "green", "yellow"]
-        for color in colors:
-
-            # Add 1 zero card
-            self.deck.add_card(uno.Card(color, 0))
-
-            # Add 2 of each other number
-            for n in range(1, 10):
-                self.deck.add_card(uno.Card(color, n))
-                self.deck.add_card(uno.Card(color, n))
-
-            # Add 2 draw 2, skip, and reverse
-            for n in range(2):
-                self.deck.add_card(uno.Card(color, "draw two"))
-                self.deck.add_card(uno.Card(color, "skip"))
-                self.deck.add_card(uno.Card(color, "reverse"))
-
-        # Add 4 wildcards and 4 wild draw 4
-        for n in range(4):
-            self.deck.add_card(uno.Card("wild", "wildcard"))
-            self.deck.add_card(uno.Card("wild", "draw four"))
+        self.player_index = 0
 
     # Make each player draw their initial hand of 7 cards
     def draw_hands(self):
@@ -57,13 +36,8 @@ class Game:
     # Boolean function to test if the specified card can be played
     def can_play_card(self, card):
 
-        # If no cards have been played, return True
-        # TODO: look for a way to handle this case without checking every time
-        if self.played_cards == []:
-            return True
-
         # Get the last card played from the end of the list of played cards
-        last_card_played = self.played_cards[len(self.played_cards) - 1]
+        last_card_played = self.deck.discard_pile[-1]
         last_color = last_card_played.get_color()
 
         # If last played card was wild, get its temporary color
@@ -89,39 +63,37 @@ class Game:
     # Make the specified player play a card
     def play_card(self, player):
 
-        print(self.draw_card_horizontal(player.get_hand()))
-        # Print out the player's hand
-        i = 1
-        for card in player.get_hand():
-            print('\nCard %s:' % i)
-            print(card)
-            i += 1
+        name = player.get_name()
+        new_color = ''
 
         # Make the player draw cards until one of them can be played
         # TODO: add functionality for different rule where player only has to draw once
         # TODO: display number of card drawn so it can be picked
         while self.has_to_draw(player):
-            name = player.get_name()
-            print('%s has to draw' % name)
-            draw_card = self.deck.draw_card()
-            print('%s drew this card: \n%s' % (name, draw_card))
-            player.add_to_hand(draw_card)
+            draw_input = input("\nYou do not have a playable card at hand,  enter 'draw' to draw another card:\n")
+            draw_input = draw_input.lower();
+            if draw_input == 'draw':
+                draw_card = self.deck.draw_card()
+                print('\n%s drew this card: \n%s' % (name, draw_card))
+                player.add_to_hand(draw_card)
+                self.print_hand(player)
+            else:
+                print("\nDraw failed. Try again:")
 
-        # Ask the player which card to play until the input a valid index
-        choice_index = int(input("Which card will you play?\n")) - 1
-        print(choice_index)
-        while choice_index > 7 or choice_index < 0:
-            print("Not a valid choice.")
-            choice_index = int(input("Which card will you play?\n")) - 1
+        print("Your current hand:\n")
+        self.print_hand(player)
+        
+        # Ask the player which card to play until they input a valid index
+        choice_index = player.choose_card()
         chosen_card = player.get_hand()[choice_index]
 
-        # Ask the player which card to play until the card the choose can be played
+        # Ask the player which card to play until the card they choose can be played
         while not self.can_play_card(chosen_card):
-            print('Not a valid card choice')
-            chosen_card = player.get_hand()[int(input('Which card will you play?\n')) - 1]
+            print('\nYou cannot play that card.')
+            chosen_card = player.get_hand()[player.choose_card()]
 
         # Add the chosen card to the played cards list
-        self.played_cards.append(chosen_card)
+        self.deck.discard_pile.append(chosen_card)
 
         # Remove the played card from the player's hand
         player.remove_from_hand(choice_index)
@@ -130,102 +102,95 @@ class Game:
         # TODO: implement this
         # TODO: make all quotes single
         if chosen_card.get_color() == 'wild':
-            new_color = input('Choose a new color:\n')
-            print('Color changed to %s' % new_color)
-            new_color.lower()
+            new_color = player.choose_color()
+            new_color = new_color.lower()
+
+            while (new_color != 'red' and new_color != 'yellow' and new_color != 'blue' and new_color != 'green'):
+                new_color = input("\nInvalid color. Try again:\n")
+                new_color = new_color.lower()
+
             chosen_card.set_temp_color(new_color)
+        
+        elif chosen_card.get_number() == 'skip':
+          next_player = self.players[(self.player_index + 1) % len(self.players)]
+          self.skip_next_player()
+          print('%s was skipped.' % next_player.get_name())
 
-    # Increment the turn index and return it to zero if necessary
-    def next_turn(self):
+        elif chosen_card.get_number() == 'draw 2':
+          next_player = self.players[(self.player_index + 1) % len(self.players)]
+          self.draw_multiple(next_player, 2)
+          self.skip_next_player()
+          print('\n%s had to draw 2 cards.' % next_player.get_name())
+        
+        elif chosen_card.get_number() == 'reverse':
+          self.reverse(player)
+          print('\n\nThe order was reversed.')
 
-        self.turn += 1
-        if self.turn >= len(self.players):
-            self.turn = 0
+        if chosen_card.get_number() == 'draw 4':
+          next_player = self.players[(self.player_index + 1) % len(self.players)]
+          self.draw_multiple(next_player, 4)
+          self.skip_next_player()
+          print('\n\n%s had to draw 4 cards.' % next_player.get_name())
 
     # Make the given player take their turn
     def do_turn(self, player):
-
         name = player.get_name()
+
         # Print which player's turn it is and which turn it is
+        print('\n\n\nTurn %d, %s\'s turn:' % (self.turn+1, name))
 
-        print('\n\n\n\n\n\nTurn %s, %s\'s turn: ' % (self.turn, name))
+        # Get the last played card from the end of the played cards list
+        last_card_played = self.deck.discard_pile[-1]
 
-        # If no cards have been played, the player can play a card
-        # TODO: find a way to handle this without checking every time
-        if self.played_cards == []:
-            self.play_card(player)
-        else:
+        if last_card_played.get_color() == 'wild':
+            print('\nThe color has been changed to %s.' % last_card_played.get_temp_color())
 
-            # Get the last played card from the end of the played cards list
-            last_card_played = self.played_cards[len(self.played_cards) - 1]
+        # Print the previously played card
+        print('\nPrevious card:')
+        print(last_card_played)
+        print('\n\n')
 
-            # Print the previously played card
-            print('Previous card:')
-            print(last_card_played)
-            print('\n\n')
+        # Get the "number" of the last card
+        # last_number = last_card_played.get_number()
 
-            # Get the "number" of the last card
-            last_number = last_card_played.get_number()
-
-            # If the last card was a number, the player can play a card
-            if isinstance(last_number, int) or last_number == 'wildcard':
-
-                # Print('last card was a number')
-                self.play_card(player)
-
-            # If the last card was a skip, skip the next player
-            elif last_number == 'skip':
-
-                # print('last card was a skip')
-                self.skip_player(self.players[self.turn % len(self.players)])
-                print('%s was skipped' % name)
-
-            # If the last card was a reverse, reverse the turn order
-            elif last_number == 'reverse':
-
-                # print('last card was a reverse')
-                self.reverse(player)
-                print('order reversed')
-
-            # If the last card was a draw 2, make the next player draw 2
-            # TODO: fix bug where if a draw 2 is played, loops infinitely bc it keeps making people draw
-            elif last_number == 'draw 2':
-
-                # print('last card was a draw 2')
-                self.draw_multiple(player, 2)
-                print('%s had to draw 2 cards' % name)
-
-            # If the last card was a draw 4, make the next player draw 4
-            elif last_number == 'draw 4':
-
-                # print('last card was a draw 4')
-                self.draw_multiple(player, 4)
-                print('%s had to draw 4 cards' % name)
-
-            # else:
-            # print('card is wrong')
+          # Print('last card was a number')
+        self.play_card(player)
 
     # Initialize the game by creating the deck, shuffling it, and having players draw their hands
     def init_game(self):
 
-        self.init_deck()
+        self.deck.init_deck()
         self.deck.shuffle()
         self.draw_hands()
+        starter_flag = False;
+        self.deck.discard_pile = [];
 
+        while not starter_flag:
+            self.deck.discard_pile.append(self.deck.draw_card())
+            last_card_num = self.deck.discard_pile[-1].get_number()
+            if last_card_num != 'draw 4' and last_card_num != 'wildcard':
+                starter_flag = True;
+            else:
+                print(self.deck.discard_pile[-1])
+                print("\nDrawing another card...The first card flipped was invalid.")
+                        
     # Play the game
     def play_game(self):
         current_player = None
         # Do turns until a player has won
         while not self.player_has_won():
             # Get the player who's turn it is
-            current_player = self.players[self.turn % len(self.players)]
+            current_player = self.players[self.player_index] 
+            #self.turn % len(self.players)
 
             # Do their turn and move to the next turn
             self.do_turn(current_player)
+            self.player_index += 1
+            self.player_index %= len(self.players)
             self.turn += 1
 
         # Print the winning player's name
-        print('%s won!' % (current_player.get_name()))
+        print('\n%s won!' % (current_player.get_name()))
 
     # get the list of players
     def get_players(self):
@@ -236,10 +201,8 @@ class Game:
         return self.deck
 
     # Skip the specified player's turn
-    def skip_player(self, player):
-
-        player_index = self.players.index(player)
-        self.turn = 1 + player_index
+    def skip_next_player(self):
+        self.player_index += 1
 
     # Reverse the turn order
     def reverse(self, current_player):
@@ -248,7 +211,7 @@ class Game:
 
         # Make sure the turn index remains on the same player
         current_player_index = self.players.index(current_player)
-        self.turn = current_player_index
+        self.player_index = current_player_index
 
     # Make the specified player draw the specified number of cards
     def draw_multiple(self, player, n):
@@ -258,11 +221,22 @@ class Game:
     # Print out cards horizontally
     def draw_card_horizontal(self, card_list):
 
+        # create empty str for output and empty list for storing lists of card lines
         output = ''
         card_lines = []
         for card in card_list:
-            card_lines.append(str(card).split('\n'))
 
+          # Split each card into its individual lines
+          split_card = str(card).split('\n')
+
+          # Color each line separately because split method messes up color
+          for i in range(len(split_card)):
+            split_card[i] = uno.get_color_str(card.get_color()) + split_card[i] + uno.bcolors.ENDC
+
+          # Add list of colored lines to the master list
+          card_lines.append(split_card)
+
+        # for every row, get that row of each card and put them together, then put a newline at the end
         for row_index in range(len(card_lines[0])):
             for lines in card_lines:
                 output += lines[row_index]
@@ -270,4 +244,29 @@ class Game:
             output += '\n'
         return output
 
+    # Print out the player's hand
+    def print_hand(self, player):
+        hand = player.get_hand()
+        card_nums = ''
 
+        # print normally if less than 6 cards
+        if len(hand) <= 6:
+          for i in range(len(hand)):
+            card_nums += ' ' + str(i+1)
+            card_nums += ' ' * (len(str(hand[0]).split('\n')[1])-1)
+          print('\n' + card_nums)
+          print(self.draw_card_horizontal(hand))
+        
+        # split into 6 card rows to prevent console overlap
+        else:
+          card_index = 0;
+          for i in range((len(hand) // 6) + 1):
+            temp_hand = hand[card_index:card_index + 6]
+            card_nums = ''
+            for j in range(len(temp_hand)):
+              card_nums += ' %d' %(card_index+j+1)
+              card_nums += ' ' * (len(str(temp_hand[0]).split('\n')[1])-1)
+            card_index += len(temp_hand)
+            print(card_nums)
+            print(self.draw_card_horizontal(temp_hand))
+            
