@@ -1,6 +1,4 @@
 # Virtual UNO Classes
-
-from termcolor import colored
 import random
 
 
@@ -119,29 +117,6 @@ class Card:
     def get_number(self):
         return self.number
 
-    # Allow for card size scaling
-    def scale(self, width, height=None):
-        if height is None:
-            height = width
-
-        card_str = ' '
-        card_str += '_' * (width - 2)
-        card_str += ' \n'
-        card_str += '|'
-        card_str += '%s%s' % (self.number, ' ' * (10 - len(str(self.number))))
-        print("f")
-        print(card_str)
-        for i in range(height - 3):
-            card_str += '|' + (' ' * width - 2) + '|'
-        card_str += '|' + ('_' * width - 2) + '|'
-        print(card_str)
-        # Color the card
-        if not self.color == 'wild':
-            return colored(card_str, self.color)
-        #else:
-        #return colored(card_str, 'magenta')
-        return 'y'
-
     # Format card to a string graphic to display in terminal
     def __str__(self):
 
@@ -158,14 +133,14 @@ class Card:
         return get_color_str(self.color) + card_str + bcolors.ENDC
 
 
-#TODO: add functionality for when deck is empty
+# TODO: add functionality for when deck is empty
 class Deck:
     def __init__(self, card_list=None):
 
         # Initializes empty card list if no cards are appended to the deck
         if card_list is None:
             self.card_list = []
-        
+
         self.discard_pile = []
 
     # Adds card to deck
@@ -206,18 +181,22 @@ class Deck:
 
     def reshuffle(self):
         print("\nDeck is empty. Reshuffling...")
-        if not self.discard_pile:
-          print("not enough cards")
-          raise RuntimeError
-          
-        self.card_list = self.discard_pile
-        self.discard_pile = []
+        if len(self.discard_pile) <= 1:
+            raise RuntimeError
+
+        self.card_list = self.discard_pile[:-1]
+        self.discard_pile = self.discard_pile[-1:]
         self.shuffle()
 
     # Returns a drawn card from deck
     def draw_card(self):
         if not self.card_list:
-          self.reshuffle()
+            try:
+                self.reshuffle()
+            except RuntimeError:
+                print("\nThe deck is completely empty...Ending the game.")
+                exit(1)
+
         card = self.card_list.pop()
         return card
 
@@ -227,7 +206,7 @@ class Deck:
 
     # returns the deck
     def get_card_list(self):
-      return self.card_list
+        return self.card_list
 
     # Returns deck with card visuals
     def __str__(self):
@@ -246,29 +225,3 @@ class UnoBot(Player):
 
     def choose_color(self):
         pass
-
-
-class GameLogger():
-    def __init__(self, file_name=None):
-        if file_name is None:
-            with open('config.txt', 'r') as config:
-                self.file_name = 'game_log_%s' % (config.readline()[-1:])
-            with open('config.txt', 'w') as config:
-                config.write('game_num = %s' % (int(self.file_name[-1:]) + 1))
-
-    @staticmethod
-    def reset_game_count():
-        with open('config.txt', 'w') as config:
-            config.write('game_num = 1')
-
-    def log_raw(self, text):
-        with open(self.fie_name, 'a') as log_file:
-            log_file.write(text)
-
-    def log_print(self, text):
-        print(text)
-        self.log_raw(text)
-
-    def log_hand(self, card_list):
-        for card in card_list:
-            pass

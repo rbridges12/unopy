@@ -76,7 +76,11 @@ class Game:
                 draw_card = self.deck.draw_card()
                 print('\n%s drew this card: \n%s' % (name, draw_card))
                 player.add_to_hand(draw_card)
-                self.print_hand(player)
+                last_card_played = self.deck.discard_pile[-1]
+                if last_card_played.get_color() == 'wild':
+                    print('\nThe current color is %s.\n' % last_card_played.get_temp_color())
+                else:
+                    print('\nThe current color is %s.\n' % last_card_played.get_color())
             else:
                 print("\nDraw failed. Try again:")
 
