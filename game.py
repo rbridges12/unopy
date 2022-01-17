@@ -13,8 +13,8 @@ class Game:
             self.deck = uno.Deck()
 
         # If logger is not specified, make a new one
-        if logger is None:
-          self.logger = uno.GameLogger()
+        # if logger is None:
+        #   self.logger = uno.GameLogger()
           
         # Create an index for which player's turn it is
         self.turn = 0
